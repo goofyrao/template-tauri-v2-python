@@ -17,6 +17,9 @@ on:
         description: "Release notes"
         required: false
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
 jobs:
   # Tauri example workflow - https://v2.tauri.app/distribute/pipelines/github/
   create_release:
