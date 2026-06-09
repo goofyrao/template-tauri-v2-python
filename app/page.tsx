@@ -30,17 +30,17 @@ export default function Home() {
 
   const initSidecarListeners = async () => {
     // Listen for stdout lines from the sidecar
-    const unlistenStdout = await listen('sidecar-stdout', (event) => {
+    const unlistenStdout = await listen<string>('sidecar-stdout', (event) => {
       console.log('Sidecar stdout:', event.payload);
       if (`${event.payload}`.length > 0 && event.payload !== "\r\n")
-        setLogs(prev => prev += `\n${event.payload}`)
+        setLogs(prev => `${prev}\n${event.payload}`)
     });
 
     // Listen for stderr lines from the sidecar
-    const unlistenStderr = await listen('sidecar-stderr', (event) => {
+    const unlistenStderr = await listen<string>('sidecar-stderr', (event) => {
       console.error('Sidecar stderr:', event.payload);
       if (`${event.payload}`.length > 0 && event.payload !== "\r\n")
-        setLogs(prev => prev += `\n${event.payload}`)
+        setLogs(prev => `${prev}\n${event.payload}`)
     });
 
     // Cleanup listeners when not needed
@@ -50,7 +50,7 @@ export default function Home() {
     };
   }
 
-  const apiAction = async (endpoint: string, method: string = 'GET', payload?: any) => {
+  const apiAction = async (endpoint: string, method: string = 'GET', payload?: unknown) => {
     const url = `http://${DOMAIN}:${PORT}/${endpoint}`;
     try {
       const body = payload ? JSON.stringify(payload) : null;
@@ -66,12 +66,12 @@ export default function Home() {
       console.log(json);
       // Success
       if (json?.message) {
-        setLogs(prev => prev += `\n[server-response] ${json.message}`);
+        setLogs(prev => `${prev}\n[server-response] ${json.message}`);
       }
       return json;
     } catch (err) {
       console.error(`[server-response] ${err}`);
-      setLogs(prev => prev += `\n[server-response] ${err}`);
+      setLogs(prev => `${prev}\n[server-response] ${err}`);
     }
   }
 
@@ -123,12 +123,22 @@ export default function Home() {
 
   // Start listening for server logs
   useEffect(() => {
-    initSidecarListeners()
+    let cleanup: (() => void) | undefined;
+
+    const init = async () => {
+      cleanup = await initSidecarListeners();
+    };
+
+    init();
+
+    return () => {
+      cleanup?.();
+    };
   }, [])
 
   // Listen for user key inputs and set full screen.
   useEffect(() => {
-    const listener = (event: any) => {
+    const listener = (event: KeyboardEvent) => {
       if (event.key === 'F11') {
         event.preventDefault(); // Prevent browser default behavior
         invoke('toggle_fullscreen');

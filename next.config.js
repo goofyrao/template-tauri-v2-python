@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "export",
+  turbopack: {
+    root: __dirname,
+  },
   // Re-writes dont work with Tauri...since output above is set to "export"
   // rewrites: async () => {
   //   return [
@@ -13,6 +16,7 @@ const nextConfig = {
   //     },
   //   ];
   // },
+  allowedDevOrigins: ['192.168.0.136'],
 };
 
 module.exports = nextConfig;
