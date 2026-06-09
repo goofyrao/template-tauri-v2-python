@@ -19,7 +19,14 @@ on:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
-
+    
+# Add explicit permissions here:
+  permissions:
+  contents: write       # Required to push code, create tags, or make 
+  pull-requests: write  # Required to comment on or update pull requests
+  issues: write         # Required to interact with issues
+  security-events: write # Required for CodeQL / SARIF upload tools
+      
 jobs:
   # Tauri example workflow - https://v2.tauri.app/distribute/pipelines/github/
   create_release:
